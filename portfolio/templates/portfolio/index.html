@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Recommendation</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Portfolio Recommendation System</h1>
+    <form id="queryForm" method="POST" action="{% url 'predict' %}">
+        {% csrf_token %}
+        <label for="financial_knowledge">Financial Knowledge:</label>
+        <select id="financial_knowledge" name="financial_knowledge">
+            <option value="0">Low</option>
+            <option value="1">Moderate</option>
+            <option value="2">High</option>
+        </select><br><br>
+
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" required><br><br>
+
+        <label for="time_horizon">Time Horizon:</label>
+        <select id="time_horizon" name="time_horizon">
+            <option value="0">Short</option>
+            <option value="1">Medium</option>
+            <option value="2">Long</option>
+        </select><br><br>
+
+        <label for="risk_appetite">Risk Appetite:</label>
+        <select id="risk_appetite" name="risk_appetite">
+            <option value="0">Low</option>
+            <option value="1">Medium</option>
+            <option value="2">High</option>
+        </select><br><br>
+
+        <label for="comfort_with_fluctuations">Comfort with Fluctuations:</label>
+        <select id="comfort_with_fluctuations" name="comfort_with_fluctuations">
+            <option value="0">Not Comfortable</option>
+            <option value="1">Moderate</option>
+            <option value="2">Very Comfortable</option>
+        </select><br><br>
+
+        <label for="investment_goal">Investment Goal:</label>
+        <select id="investment_goal" name="investment_goal">
+            <option value="0">Wealth Creation</option>
+            <option value="1">Safety</option>
+            <option value="2">Retirement</option>
+        </select><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Portfolio Allocation</h2>
+    <canvas id="portfolioChart" width="300" height="300" style="max-width: 50%;"></canvas>
+
+    <script>
+        const form = document.getElementById('queryForm');
+        const ctx = document.getElementById('portfolioChart').getContext('2d');
+
+        let chart;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            // Update chart
+            const labels = Object.keys(result);
+            const values = Object.values(result);
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Portfolio Allocation',
+                        data: values,
+                        backgroundColor: [
+                            '#FF6384',
+                            '#36A2EB',
+                            '#FFCE56',
+                            '#4BC0C0',
+                            '#9966FF',
+                            '#FF9F40'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                }
+            });
+        });
+    </script>
+</body>
+</html>
